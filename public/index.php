@@ -1,27 +1,46 @@
 <?php
-// Include our database class
-require_once '../core/Database.php';
+// Include our controller
+require_once '../app/controllers/UserController.php';
 
-echo "<h1>Multi-Vendor E-commerce Platform</h1>";
+// Basic routing
+$action = $_GET['action'] ?? 'index';
+$id = $_GET['id'] ?? null;
 
-// Test database connection
-$db = Database::getInstance();
+// Create controller instance
+$userController = new UserController();
 
-// Get all users from database
-$users = $db->fetchAll("SELECT * FROM users");
-
-echo "<h2>Users in Database:</h2>";
-echo "<table border='1'>";
-echo "<tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th></tr>";
-
-foreach ($users as $user) {
-    echo "<tr>";
-    echo "<td>" . $user['id'] . "</td>";
-    echo "<td>" . $user['name'] . "</td>";
-    echo "<td>" . $user['email'] . "</td>";
-    echo "<td>" . $user['user_type'] . "</td>";
-    echo "</tr>";
+// Handle different actions
+switch ($action) {
+    case 'index':
+        $userController->index();
+        break;
+    
+    case 'view':
+        if ($id) {
+            $userController->view($id);
+        } else {
+            $userController->index();
+        }
+        break;
+    
+    case 'create':
+        $userController->create();
+        break;
+    
+    case 'store':
+        $userController->store();
+        break;
+    
+    case 'delete':
+        if ($id) {
+            $userController->delete($id);
+        } else {
+            $userController->index();
+        }
+        break;
+    
+    default:
+        $userController->index();
+        break;
 }
-
-echo "</table>";
 ?>
