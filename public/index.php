@@ -1,16 +1,50 @@
 <?php
-// Include our controller
-require_once '../app/controllers/UserController.php';
+// Start session
+session_start();
 
-// Basic routing
-$action = $_GET['action'] ?? 'index';
+// Include controllers
+require_once '../app/controllers/UserController.php';
+require_once '../app/controllers/AuthController.php';
+
+// Get action from URL
+$action = $_GET['action'] ?? 'show-login';
 $id = $_GET['id'] ?? null;
 
-// Create controller instance
+// Create controllers
 $userController = new UserController();
+$authController = new AuthController();
 
-// Handle different actions
+// Route to appropriate controller and method
 switch ($action) {
+    // Authentication routes
+    case 'show-login':
+        $authController->showLogin();
+        break;
+    
+    case 'login':
+        $authController->login();
+        break;
+    
+    case 'show-register':
+        $authController->showRegister();
+        break;
+    
+    case 'register':
+        $authController->register();
+        break;
+    
+    case 'logout':
+        $authController->logout();
+        break;
+    
+    case 'dashboard':
+    case 'admin-dashboard':
+    case 'vendor-dashboard':
+        $authController->dashboard();
+        break;
+    
+    // User management routes (admin only)
+    case 'users':
     case 'index':
         $userController->index();
         break;
@@ -39,8 +73,9 @@ switch ($action) {
         }
         break;
     
+    // Default route
     default:
-        $userController->index();
+        $authController->showLogin();
         break;
 }
 ?>
