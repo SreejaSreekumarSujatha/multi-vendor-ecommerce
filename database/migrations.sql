@@ -40,3 +40,17 @@ INSERT INTO products (name, description, price, category, vendor_id, stock_quant
 ('Coffee Maker', 'Automatic drip coffee maker', 79.99, 'Home & Kitchen', 2, 8),
 ('Running Shoes', 'Comfortable running shoes for all terrains', 89.99, 'Sports', 2, 15),
 ('Smartphone', 'Latest model with advanced features', 699.99, 'Electronics', 2, 12);
+
+
+-- Cart items table
+CREATE TABLE cart_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES users(id),
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    UNIQUE KEY unique_cart_item (customer_id, product_id)
+);

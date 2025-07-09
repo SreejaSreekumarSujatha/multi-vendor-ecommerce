@@ -403,37 +403,42 @@ class ProductController {
         }
     }
     
-    // Handle image upload
-    private function handleImageUpload($file) {
-        $uploadDir = 'uploads/products/';
-        
-        // Create directory if it doesn't exist
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        
-        // Validate file
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (!in_array($file['type'], $allowedTypes)) {
-            throw new Exception("Invalid file type. Only JPG, PNG, and GIF are allowed.");
-        }
-        
-        if ($file['size'] > 5 * 1024 * 1024) { // 5MB
-            throw new Exception("File too large. Maximum size is 5MB.");
-        }
-        
-        // Generate unique filename
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = uniqid() . '.' . $extension;
-        $filepath = $uploadDir . $filename;
-        
-        // Move uploaded file
-        if (move_uploaded_file($file['tmp_name'], $filepath)) {
-            return $filepath;
-        } else {
-            throw new Exception("Failed to upload image");
-        }
+   
+// Handle image upload
+private function handleImageUpload($file) {
+    // Use absolute path for upload directory
+    $uploadDir = __DIR__ . '/../../public/uploads/products/';
+    
+    // Create directory if it doesn't exist
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
     }
+    
+    // Validate file
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $fileType = mime_content_type($file['tmp_name']);
+    
+    if (!in_array($fileType, $allowedTypes)) {
+        throw new Exception("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+    }
+    
+    if ($file['size'] > 5 * 1024 * 1024) { // 5MB
+        throw new Exception("File too large. Maximum size is 5MB.");
+    }
+    
+    // Generate unique filename
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = uniqid() . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $filepath)) {
+        // Return relative path for database storage
+        return 'uploads/products/' . $filename;
+    } else {
+        throw new Exception("Failed to upload image");
+    }
+}
     
     // Edit product
     public function editProduct($id) {
@@ -620,27 +625,200 @@ class ProductController {
         exit;
     }
     
+   
     // Helper method to render product card
-    private function renderProductCard($product) {
-        echo '<div class="product-card">';
-        echo '<div class="product-image">';
-        if ($product['image_url']) {
+private function renderProductCard($product) {
+    echo '<div class="product-card">';
+    echo '<div class="product-image">';
+    
+    if ($product['image_url']) {
+        // Check if it's a URL or local file
+        if (filter_var($product['image_url'], FILTER_VALIDATE_URL)) {
+            // External URL
             echo '<img src="' . $product['image_url'] . '" alt="' . htmlspecialchars($product['name']) . '">';
         } else {
-            echo '<div class="no-image">No Image</div>';
+            // Local file
+            echo '<img src="' . $product['image_url'] . '" alt="' . htmlspecialchars($product['name']) . '">';
         }
+    } else {
+        echo '<div class="no-image">No Image Available</div>';
+    }
+    
+    echo '</div>';
+    echo '<div class="product-info">';
+    echo '<h3>' . htmlspecialchars($product['name']) . '</h3>';
+    echo '<p class="price">$' . number_format($product['price'], 2) . '</p>';
+    echo '<p class="category">' . htmlspecialchars($product['category']) . '</p>';
+    echo '<p class="vendor">by ' . htmlspecialchars($product['vendor_name']) . '</p>';
+    echo '<p class="stock">Stock: ' . $product['stock_quantity'] . '</p>';
+    echo '<div class="product-actions">';
+    echo '<a href="?action=view-product&id=' . $product['id'] . '" class="btn btn-primary">View Details</a>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+}
+
+// Add to cart
+public function addToCart() {
+    $this->requireAuth();
+    
+    // Only customers can add to cart
+    if ($_SESSION['user_type'] !== 'customer') {
+        die('Only customers can add items to cart');
+    }
+    
+    if ($_POST) {
+        try {
+            // Verify CSRF token
+            if (!Security::verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+                throw new Exception("Invalid CSRF token");
+            }
+            
+            $productId = intval($_POST['product_id']);
+            $quantity = intval($_POST['quantity']);
+            $customerId = $_SESSION['user_id'];
+            
+            // Validate quantity
+            if ($quantity <= 0) {
+                throw new Exception("Invalid quantity");
+            }
+            
+            // Check if product exists and has enough stock
+            $product = $this->productModel->getProductById($productId);
+            if (!$product) {
+                throw new Exception("Product not found");
+            }
+            
+            if ($quantity > $product['stock_quantity']) {
+                throw new Exception("Not enough stock available");
+            }
+            
+            // Add to cart
+            require_once __DIR__ . '/../models/Cart.php';
+            $cartModel = new Cart();
+            
+            if ($cartModel->addItem($customerId, $productId, $quantity)) {
+                $_SESSION['success'] = 'Product added to cart successfully!';
+            } else {
+                throw new Exception("Failed to add product to cart");
+            }
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+        
+        // Redirect back to product page
+        header('Location: ?action=view-product&id=' . ($_POST['product_id'] ?? ''));
+        exit;
+    }
+}
+
+// View cart
+public function viewCart() {
+    $this->requireAuth();
+    
+    if ($_SESSION['user_type'] !== 'customer') {
+        die('Only customers can view cart');
+    }
+    
+    require_once __DIR__ . '/../models/Cart.php';
+    $cartModel = new Cart();
+    
+    $customerId = $_SESSION['user_id'];
+    $cartItems = $cartModel->getCartItems($customerId);
+    $cartTotal = $cartModel->getCartTotal($customerId);
+    
+    echo '<link rel="stylesheet" href="css/style.css">';
+    echo '<div class="cart-container">';
+    
+    // Header
+    echo '<div class="cart-header">';
+    echo '<h1>Shopping Cart</h1>';
+    echo '<div class="cart-nav">';
+    echo '<a href="?action=products" class="btn btn-secondary">← Continue Shopping</a>';
+    echo '<a href="?action=dashboard" class="btn btn-primary">Dashboard</a>';
+    echo '</div>';
+    echo '</div>';
+    
+    if (empty($cartItems)) {
+        echo '<div class="empty-cart">';
+        echo '<h2>Your cart is empty</h2>';
+        echo '<p>Add some products to your cart to see them here.</p>';
+        echo '<a href="?action=products" class="btn btn-primary">Start Shopping</a>';
         echo '</div>';
-        echo '<div class="product-info">';
-        echo '<h3>' . htmlspecialchars($product['name']) . '</h3>';
-        echo '<p class="price">$' . number_format($product['price'], 2) . '</p>';
-        echo '<p class="category">' . htmlspecialchars($product['category']) . '</p>';
-        echo '<p class="vendor">by ' . htmlspecialchars($product['vendor_name']) . '</p>';
-        echo '<p class="stock">Stock: ' . $product['stock_quantity'] . '</p>';
-        echo '<div class="product-actions">';
-        echo '<a href="?action=view-product&id=' . $product['id'] . '" class="btn btn-primary">View Details</a>';
+    } else {
+        // Cart items table
+        echo '<div class="cart-items">';
+        echo '<table>';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>Product</th>';
+        echo '<th>Price</th>';
+        echo '<th>Quantity</th>';
+        echo '<th>Total</th>';
+        echo '<th>Actions</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+        
+        foreach ($cartItems as $item) {
+            echo '<tr>';
+            
+            // Product info
+            echo '<td>';
+            echo '<div class="cart-product">';
+            if ($item['image_url']) {
+                echo '<img src="' . $item['image_url'] . '" alt="' . htmlspecialchars($item['name']) . '" class="cart-product-image">';
+            }
+            echo '<div class="cart-product-info">';
+            echo '<h4>' . htmlspecialchars($item['name']) . '</h4>';
+            echo '<p>Stock: ' . $item['stock_quantity'] . ' available</p>';
+            echo '</div>';
+            echo '</div>';
+            echo '</td>';
+            
+            // Price
+            echo '<td>$' . number_format($item['price'], 2) . '</td>';
+            
+            // Quantity with update form
+            echo '<td>';
+            echo '<form method="POST" action="?action=update-cart-item" class="quantity-form">';
+            echo '<input type="hidden" name="cart_item_id" value="' . $item['id'] . '">';
+            echo '<input type="hidden" name="csrf_token" value="' . Security::generateCSRFToken() . '">';
+            echo '<input type="number" name="quantity" value="' . $item['quantity'] . '" min="1" max="' . $item['stock_quantity'] . '">';
+            echo '<button type="submit" class="btn btn-small">Update</button>';
+            echo '</form>';
+            echo '</td>';
+            
+            // Total price
+            echo '<td>$' . number_format($item['total_price'], 2) . '</td>';
+            
+            // Remove button
+            echo '<td>';
+            echo '<a href="?action=remove-cart-item&id=' . $item['id'] . '" class="btn btn-danger btn-small" onclick="return confirm(\'Remove this item?\')">Remove</a>';
+            echo '</td>';
+            
+            echo '</tr>';
+        }
+        
+        echo '</tbody>';
+        echo '</table>';
         echo '</div>';
+        
+        // Cart summary
+        echo '<div class="cart-summary">';
+        echo '<h3>Cart Summary</h3>';
+        echo '<p>Total Items: ' . count($cartItems) . '</p>';
+        echo '<p class="cart-total">Total: $' . number_format($cartTotal, 2) . '</p>';
+        echo '<div class="cart-actions">';
+        echo '<a href="?action=checkout" class="btn btn-primary btn-large">Proceed to Checkout</a>';
+        echo '<a href="?action=clear-cart" class="btn btn-danger" onclick="return confirm(\'Clear entire cart?\')">Clear Cart</a>';
         echo '</div>';
         echo '</div>';
     }
+    
+    echo '</div>';
+}
+
 }
 ?>

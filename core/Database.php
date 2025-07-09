@@ -69,5 +69,9 @@ class Database {
             die("Query failed: " . $e->getMessage());
         }
     }
+
+    public function lastInsertId() {
+    return $this->connection->lastInsertId();
+    }
 }
 ?>

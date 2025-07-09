@@ -130,5 +130,32 @@ switch ($action) {
     default:
         $productController->index();
         break;
+
+
+
+        // Cart routes
+case 'add-to-cart':
+    $productController->addToCart();
+    break;
+
+case 'cart':
+case 'view-cart':
+    $productController->viewCart();
+    break;
+
+case 'update-cart-item':
+    $productController->updateCartItem();
+    break;
+
+case 'remove-cart-item':
+    $productController->removeCartItem();
+    break;
+
+case 'clear-cart':
+    $productController->clearCart();
+    break;
 }
+
+
+
 ?>
