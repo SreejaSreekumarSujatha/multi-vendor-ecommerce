@@ -5,14 +5,16 @@ session_start();
 // Include controllers
 require_once '../app/controllers/UserController.php';
 require_once '../app/controllers/AuthController.php';
+require_once '../app/controllers/ProductController.php';
 
 // Get action from URL
-$action = $_GET['action'] ?? 'show-login';
+$action = $_GET['action'] ?? 'products';
 $id = $_GET['id'] ?? null;
 
 // Create controllers
 $userController = new UserController();
 $authController = new AuthController();
+$productController = new ProductController();
 
 // Route to appropriate controller and method
 switch ($action) {
@@ -43,13 +45,64 @@ switch ($action) {
         $authController->dashboard();
         break;
     
+    // Product routes
+    case 'products':
+    case 'shop':
+        $productController->index();
+        break;
+    
+    case 'search':
+        $productController->search();
+        break;
+    
+    case 'view-product':
+        if ($id) {
+            $productController->view($id);
+        } else {
+            $productController->index();
+        }
+        break;
+    
+    // Vendor product management
+    case 'my-products':
+        $productController->myProducts();
+        break;
+    
+    case 'add-product':
+        $productController->addProduct();
+        break;
+    
+    case 'store-product':
+        $productController->storeProduct();
+        break;
+    
+    case 'edit-product':
+        if ($id) {
+            $productController->editProduct($id);
+        } else {
+            header('Location: ?action=my-products');
+        }
+        break;
+    
+    case 'update-product':
+        $productController->updateProduct();
+        break;
+    
+    case 'delete-product':
+        if ($id) {
+            $productController->deleteProduct($id);
+        } else {
+            header('Location: ?action=my-products');
+        }
+        break;
+    
     // User management routes (admin only)
     case 'users':
-    case 'index':
+    case 'manage-users':
         $userController->index();
         break;
     
-    case 'view':
+    case 'view-user':
         if ($id) {
             $userController->view($id);
         } else {
@@ -57,15 +110,15 @@ switch ($action) {
         }
         break;
     
-    case 'create':
+    case 'create-user':
         $userController->create();
         break;
     
-    case 'store':
+    case 'store-user':
         $userController->store();
         break;
     
-    case 'delete':
+    case 'delete-user':
         if ($id) {
             $userController->delete($id);
         } else {
@@ -75,7 +128,7 @@ switch ($action) {
     
     // Default route
     default:
-        $authController->showLogin();
+        $productController->index();
         break;
 }
 ?>
