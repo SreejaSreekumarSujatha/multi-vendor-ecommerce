@@ -16,48 +16,57 @@ class AuthController {
         }
     }
     
-    // Show login form
-    public function showLogin() {
-        // If already logged in, redirect to dashboard
-        if ($this->isLoggedIn()) {
-            $this->redirect('dashboard');
-            return;
-        }
-        
-        $csrfToken = Security::generateCSRFToken();
-        
-        echo '<link rel="stylesheet" href="css/style.css">';
-        echo '<div class="auth-container">';
-        echo '<h1>Login</h1>';
-        
-        // Show error message if exists
-        if (isset($_SESSION['error'])) {
-            echo '<div class="error-message">' . $_SESSION['error'] . '</div>';
-            unset($_SESSION['error']);
-        }
-        
-        echo '<form method="POST" action="?action=login" class="auth-form">';
-        echo '<input type="hidden" name="csrf_token" value="' . $csrfToken . '">';
-        
-        echo '<div class="form-group">';
-        echo '<label for="email">Email:</label>';
-        echo '<input type="email" id="email" name="email" required>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<label for="password">Password:</label>';
-        echo '<input type="password" id="password" name="password" required>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<input type="submit" value="Login" class="btn btn-primary">';
-        echo '</div>';
-        
-        echo '</form>';
-        
-        echo '<p>Don\'t have an account? <a href="?action=show-register">Register here</a></p>';
-        echo '</div>';
+// Show login form - FIXED VERSION
+public function showLogin() {
+    // If already logged in, redirect to dashboard
+    if ($this->isLoggedIn()) {
+        $this->redirect('dashboard');
+        return;
     }
+    
+    $csrfToken = Security::generateCSRFToken();
+    
+    echo '<link rel="stylesheet" href="css/style.css">';
+    echo '<div class="auth-container">';
+    echo '<h1>Login</h1>';
+    
+    // Show error message if exists
+    if (isset($_SESSION['error'])) {
+        echo '<div class="error-message">' . htmlspecialchars($_SESSION['error']) . '</div>';
+        unset($_SESSION['error']);
+    }
+    
+    // Show success message if exists
+    if (isset($_SESSION['success'])) {
+        echo '<div class="success-message">' . htmlspecialchars($_SESSION['success']) . '</div>';
+        unset($_SESSION['success']);
+    }
+    
+    echo '<form method="POST" action="?action=login" class="auth-form">';
+    echo '<input type="hidden" name="csrf_token" value="' . $csrfToken . '">';
+    
+    echo '<div class="form-group">';
+    echo '<label for="email">Email:</label>';
+    echo '<input type="email" id="email" name="email" required placeholder="Enter your email">';
+    echo '</div>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="password">Password:</label>';
+    echo '<input type="password" id="password" name="password" required placeholder="Enter your password">';
+    echo '</div>';
+    
+    echo '<div class="form-group">';
+    // CHANGED: Using button instead of input type="submit"
+    echo '<button type="submit" class="btn btn-primary btn-large">LOGIN</button>';
+    echo '</div>';
+    
+    echo '</form>';
+    
+    echo '<div class="auth-links">';
+    echo '<p>Don\'t have an account? <a href="?action=show-register" class="auth-link">Register here</a></p>';
+    echo '</div>';
+    echo '</div>';
+}
     
     // Handle login
     public function login() {
@@ -106,73 +115,77 @@ class AuthController {
         }
     }
     
-    // Show registration form
-    public function showRegister() {
-        // If already logged in, redirect to dashboard
-        if ($this->isLoggedIn()) {
-            $this->redirect('dashboard');
-            return;
-        }
-        
-        $csrfToken = Security::generateCSRFToken();
-        
-        echo '<link rel="stylesheet" href="css/style.css">';
-        echo '<div class="auth-container">';
-        echo '<h1>Register</h1>';
-        
-        // Show error message if exists
-        if (isset($_SESSION['error'])) {
-            echo '<div class="error-message">' . $_SESSION['error'] . '</div>';
-            unset($_SESSION['error']);
-        }
-        
-        // Show success message if exists
-        if (isset($_SESSION['success'])) {
-            echo '<div class="success-message">' . $_SESSION['success'] . '</div>';
-            unset($_SESSION['success']);
-        }
-        
-        echo '<form method="POST" action="?action=register" class="auth-form">';
-        echo '<input type="hidden" name="csrf_token" value="' . $csrfToken . '">';
-        
-        echo '<div class="form-group">';
-        echo '<label for="name">Full Name:</label>';
-        echo '<input type="text" id="name" name="name" required>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<label for="email">Email:</label>';
-        echo '<input type="email" id="email" name="email" required>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<label for="password">Password:</label>';
-        echo '<input type="password" id="password" name="password" required>';
-        echo '<small>Must be at least 8 characters with uppercase, lowercase, and number</small>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<label for="confirm_password">Confirm Password:</label>';
-        echo '<input type="password" id="confirm_password" name="confirm_password" required>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<label for="user_type">I want to:</label>';
-        echo '<select id="user_type" name="user_type" required>';
-        echo '<option value="customer">Buy Products (Customer)</option>';
-        echo '<option value="vendor">Sell Products (Vendor)</option>';
-        echo '</select>';
-        echo '</div>';
-        
-        echo '<div class="form-group">';
-        echo '<input type="submit" value="Register" class="btn btn-primary">';
-        echo '</div>';
-        
-        echo '</form>';
-        
-        echo '<p>Already have an account? <a href="?action=show-login">Login here</a></p>';
-        echo '</div>';
-    }
+  // Show registration form - FIXED VERSION
+public function showRegister() {
+    // If already logged in, redirect to dashboard
+    if ($this->isLoggedIn()) {
+        $this->redirect('dashboard');
+        return;
+   }
+   
+   $csrfToken = Security::generateCSRFToken();
+   
+   echo '<link rel="stylesheet" href="css/style.css">';
+   echo '<div class="auth-container">';
+   echo '<h1>Register</h1>';
+   
+   // Show error message if exists
+   if (isset($_SESSION['error'])) {
+       echo '<div class="error-message">' . htmlspecialchars($_SESSION['error']) . '</div>';
+       unset($_SESSION['error']);
+   }
+   
+   // Show success message if exists
+   if (isset($_SESSION['success'])) {
+       echo '<div class="success-message">' . htmlspecialchars($_SESSION['success']) . '</div>';
+       unset($_SESSION['success']);
+   }
+   
+   echo '<form method="POST" action="?action=register" class="auth-form">';
+   echo '<input type="hidden" name="csrf_token" value="' . $csrfToken . '">';
+   
+   echo '<div class="form-group">';
+   echo '<label for="name">Full Name:</label>';
+   echo '<input type="text" id="name" name="name" required placeholder="Enter your full name">';
+   echo '</div>';
+   
+   echo '<div class="form-group">';
+   echo '<label for="email">Email:</label>';
+   echo '<input type="email" id="email" name="email" required placeholder="Enter your email">';
+   echo '</div>';
+   
+   echo '<div class="form-group">';
+   echo '<label for="password">Password:</label>';
+   echo '<input type="password" id="password" name="password" required placeholder="Enter your password">';
+   echo '<small>Must be at least 8 characters with uppercase, lowercase, and number</small>';
+   echo '</div>';
+   
+   echo '<div class="form-group">';
+   echo '<label for="confirm_password">Confirm Password:</label>';
+   echo '<input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">';
+   echo '</div>';
+   
+   echo '<div class="form-group">';
+   echo '<label for="user_type">I want to:</label>';
+   echo '<select id="user_type" name="user_type" required>';
+   echo '<option value="">Select an option</option>';
+   echo '<option value="customer">Buy Products (Customer)</option>';
+   echo '<option value="vendor">Sell Products (Vendor)</option>';
+   echo '</select>';
+   echo '</div>';
+   
+   echo '<div class="form-group">';
+   // CHANGED: Using button instead of input type="submit"
+   echo '<button type="submit" class="btn btn-primary btn-large">REGISTER</button>';
+   echo '</div>';
+   
+   echo '</form>';
+   
+   echo '<div class="auth-links">';
+   echo '<p>Already have an account? <a href="?action=show-login" class="auth-link">Login here</a></p>';
+   echo '</div>';
+   echo '</div>';
+}
     
     // Handle registration
     public function register() {

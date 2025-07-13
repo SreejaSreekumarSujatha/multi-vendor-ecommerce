@@ -24,10 +24,11 @@ class Product {
     }
     
     // Get products by vendor
-    public function getProductsByVendor($vendorId) {
-        $sql = "SELECT * FROM products WHERE vendor_id = ? ORDER BY created_at DESC";
-        return $this->db->fetchAll($sql, [$vendorId]);
-    }
+public function getProductsByVendor($vendorId) {
+    // Add AND is_active = 1 to filter out deleted products
+    $sql = "SELECT * FROM products WHERE vendor_id = ? AND is_active = 1 ORDER BY created_at DESC";
+    return $this->db->fetchAll($sql, [$vendorId]);
+}
     
     // Get product by ID
     public function getProductById($id) {

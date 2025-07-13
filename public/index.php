@@ -6,6 +6,8 @@ session_start();
 require_once '../app/controllers/UserController.php';
 require_once '../app/controllers/AuthController.php';
 require_once '../app/controllers/ProductController.php';
+require_once '../app/controllers/OrderController.php';
+
 
 // Get action from URL
 $action = $_GET['action'] ?? 'products';
@@ -153,6 +155,42 @@ case 'remove-cart-item':
 
 case 'clear-cart':
     $productController->clearCart();
+    break;
+
+    case 'get-cart-data':
+    $productController->getCartData();
+    break;
+
+    case 'checkout':
+    $orderController = new OrderController();
+    $orderController->checkout();
+    break;
+case 'place-order':
+    $orderController = new OrderController();
+    $orderController->placeOrder();
+    break;
+case 'order-confirmation':
+    $orderController = new OrderController();
+    $orderController->orderConfirmation();
+    break;
+
+// Vendor order management
+case 'my-orders':
+    if ($_SESSION['user_type'] === 'vendor' || $_SESSION['user_type'] === 'admin') {
+        $productController->myOrders();
+    } else {
+        $orderController = new OrderController();
+        $orderController->myOrders();
+    }
+    break;
+case 'view-order':
+    $productController->viewOrder();
+    break;
+case 'update-order-status':
+    $productController->updateOrderStatus();
+    break;
+case 'earnings':
+    $productController->earnings();
     break;
 }
 

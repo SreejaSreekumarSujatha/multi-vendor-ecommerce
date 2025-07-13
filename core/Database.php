@@ -27,7 +27,7 @@ class Database {
             // Set error mode to exception
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            echo "Database connected successfully!<br>";
+            // echo "Database connected successfully!<br>";
         } catch (PDOException $e) {
             die("Database connection failed: " . $e->getMessage());
         }
@@ -73,5 +73,6 @@ class Database {
     public function lastInsertId() {
     return $this->connection->lastInsertId();
     }
+    
 }
 ?>
