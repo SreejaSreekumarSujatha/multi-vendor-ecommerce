@@ -169,5 +169,12 @@ private function getLastOrderId($customerId, $orderNumber) {
         $sql = "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?";
         return $this->db->execute($sql, [$quantity, $productId]);
     }
+
+
+    // Add to Order.php
+public function updatePaymentStatus($orderId, $status, $transactionId = null) {
+    $sql = "UPDATE orders SET payment_status = ?, transaction_id = ?, updated_at = NOW() WHERE id = ?";
+    return $this->db->execute($sql, [$status, $transactionId, $orderId]);
+}
 }
 ?>

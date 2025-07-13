@@ -192,6 +192,43 @@ case 'update-order-status':
 case 'earnings':
     $productController->earnings();
     break;
+
+    // Add these cases to your switch statement
+case 'profile':
+case 'edit-profile':
+    $authController->editProfile();
+    break;
+case 'update-profile':
+    $authController->updateProfile();
+    break;
+case 'change-password':
+    $authController->changePassword();
+    break;
+case 'update-password':
+    $authController->updatePassword();
+    break;
+
+    case 'paypal-success':
+    if ($_SESSION['user_type'] === 'customer') {
+        $orderController->paypalSuccess();
+    } else {
+        $productController->paypalSuccess();
+    }
+    break;
+case 'paypal-cancel':
+    if ($_SESSION['user_type'] === 'customer') {
+        $orderController->paypalCancel();
+    } else {
+        $productController->paypalCancel();
+    }
+    break;
+case 'paypal-ipn':
+    if ($_SESSION['user_type'] === 'customer') {
+        $orderController->paypalIPN();
+    } else {
+        $productController->paypalIPN();
+    }
+    break;
 }
 
 

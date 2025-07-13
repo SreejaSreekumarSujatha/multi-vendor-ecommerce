@@ -81,5 +81,65 @@ class User {
         $sql = "SELECT * FROM users WHERE email = ?";
         return $this->db->fetch($sql, [$email]);
     }
+
+    // Add these methods to User.php
+
+public function updateProfile($userId, $data) {
+    try {
+        // Sanitize inputs
+        $name = Security::sanitizeInput($data['name']);
+        $email = Security::sanitizeInput($data['email']);
+        
+        // Validate email
+        if (!Security::validateEmail($email)) {
+            throw new Exception("Invalid email format");
+        }
+        
+        // Check if email is taken by another user
+        $existingUser = $this->getUserByEmail($email);
+        if ($existingUser && $existingUser['id'] != $userId) {
+            throw new Exception("Email already exists");
+        }
+        
+        $sql = "UPDATE users SET name = ?, email = ?, updated_at = NOW() WHERE id = ?";
+        return $this->db->execute($sql, [$name, $email, $userId]);
+        
+    } catch (Exception $e) {
+        error_log("Profile update error: " . $e->getMessage());
+        throw $e;
+    }
+}
+
+public function updatePassword($userId, $currentPassword, $newPassword) {
+    try {
+        // Get user with password
+        $sql = "SELECT password FROM users WHERE id = ? AND is_active = 1";
+        $user = $this->db->fetch($sql, [$userId]);
+        
+        if (!$user) {
+            throw new Exception("User not found");
+        }
+        
+        // Verify current password
+        if (!password_verify($currentPassword, $user['password'])) {
+            throw new Exception("Current password is incorrect");
+        }
+        
+        // Validate new password
+        if (!Security::validatePassword($newPassword)) {
+            throw new Exception("New password does not meet requirements");
+        }
+        
+        // Update password
+        $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
+        $sql = "UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?";
+        
+        return $this->db->execute($sql, [$hashedPassword, $userId]);
+        
+    } catch (Exception $e) {
+        error_log("Password update error: " . $e->getMessage());
+        throw $e;
+    }
+}
 }
 ?>

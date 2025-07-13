@@ -371,7 +371,7 @@ public function showRegister() {
         echo '<div class="dashboard-card">';
         echo '<h3>Account Settings</h3>';
         echo '<p>Update your profile information</p>';
-        echo '<a href="?action=profile" class="btn btn-primary">Edit Profile</a>';
+       echo '<a href="?action=edit-profile" class="btn btn-primary">Edit Profile</a>';
         echo '</div>';
         echo '</div>';
     }
@@ -385,5 +385,228 @@ public function showRegister() {
         header("Location: ?action=$action");
         exit;
     }
+
+    // Add these methods to AuthController.php
+
+// Show profile edit form
+public function editProfile() {
+    $this->requireAuth();
+    
+    $userId = $_SESSION['user_id'];
+    
+    // Get current user data
+    $user = $this->userModel->getUserById($userId);
+    if (!$user) {
+        $_SESSION['error'] = 'User not found';
+        header('Location: ?action=dashboard');
+        exit;
+    }
+    
+    $csrfToken = Security::generateCSRFToken();
+    
+    echo '<link rel="stylesheet" href="css/style.css">';
+    echo '<div class="profile-container">';
+    
+    // Show messages
+    if (isset($_SESSION['success'])) {
+        echo '<div class="success-message">' . $_SESSION['success'] . '</div>';
+        unset($_SESSION['success']);
+    }
+    if (isset($_SESSION['error'])) {
+        echo '<div class="error-message">' . $_SESSION['error'] . '</div>';
+        unset($_SESSION['error']);
+    }
+    
+    // Header
+    echo '<div class="profile-header">';
+    echo '<h1>Edit Profile</h1>';
+    echo '<a href="?action=dashboard" class="btn btn-secondary">← Back to Dashboard</a>';
+    echo '</div>';
+    
+    // Profile Form
+    echo '<div class="profile-form-container">';
+    echo '<form method="POST" action="?action=update-profile" class="profile-form">';
+    echo '<input type="hidden" name="csrf_token" value="' . $csrfToken . '">';
+    
+    echo '<div class="form-section">';
+    echo '<h2>Personal Information</h2>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="name">Full Name:</label>';
+    echo '<input type="text" id="name" name="name" required value="' . htmlspecialchars($user['name']) . '">';
+    echo '</div>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="email">Email Address:</label>';
+    echo '<input type="email" id="email" name="email" required value="' . htmlspecialchars($user['email']) . '">';
+    echo '<small>This will be your login username</small>';
+    echo '</div>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="user_type">Account Type:</label>';
+    echo '<select id="user_type" name="user_type" disabled>';
+    echo '<option value="customer"' . ($user['user_type'] === 'customer' ? ' selected' : '') . '>Customer</option>';
+    echo '<option value="vendor"' . ($user['user_type'] === 'vendor' ? ' selected' : '') . '>Vendor</option>';
+    echo '<option value="admin"' . ($user['user_type'] === 'admin' ? ' selected' : '') . '>Admin</option>';
+    echo '</select>';
+    echo '<small>Account type cannot be changed. Contact support if needed.</small>';
+    echo '</div>';
+    
+    echo '</div>';
+    
+    echo '<div class="form-actions">';
+    echo '<button type="submit" class="btn btn-primary btn-large">Update Profile</button>';
+    echo '<a href="?action=change-password" class="btn btn-secondary">Change Password</a>';
+    echo '</div>';
+    
+    echo '</form>';
+    echo '</div>';
+    
+    echo '</div>';
+}
+
+// Update profile
+public function updateProfile() {
+    $this->requireAuth();
+    
+    if ($_POST) {
+        try {
+            // Verify CSRF token
+            if (!Security::verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+                throw new Exception("Invalid CSRF token");
+            }
+            
+            $userId = $_SESSION['user_id'];
+            
+            $data = [
+                'name' => Security::sanitizeInput($_POST['name']),
+                'email' => Security::sanitizeInput($_POST['email'])
+            ];
+            
+            // Update profile
+            if ($this->userModel->updateProfile($userId, $data)) {
+                // Update session data
+                $_SESSION['user_name'] = $data['name'];
+                $_SESSION['user_email'] = $data['email'];
+                
+                $_SESSION['success'] = 'Profile updated successfully!';
+            } else {
+                throw new Exception("Failed to update profile");
+            }
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+        
+        header('Location: ?action=edit-profile');
+        exit;
+    }
+}
+
+// Show change password form
+public function changePassword() {
+    $this->requireAuth();
+    
+    $csrfToken = Security::generateCSRFToken();
+    
+    echo '<link rel="stylesheet" href="css/style.css">';
+    echo '<div class="password-container">';
+    
+    // Show messages
+    if (isset($_SESSION['success'])) {
+        echo '<div class="success-message">' . $_SESSION['success'] . '</div>';
+        unset($_SESSION['success']);
+    }
+    if (isset($_SESSION['error'])) {
+        echo '<div class="error-message">' . $_SESSION['error'] . '</div>';
+        unset($_SESSION['error']);
+    }
+    
+    // Header
+    echo '<div class="password-header">';
+    echo '<h1>Change Password</h1>';
+    echo '<a href="?action=edit-profile" class="btn btn-secondary">← Back to Profile</a>';
+    echo '</div>';
+    
+    // Password Form
+    echo '<div class="password-form-container">';
+    echo '<form method="POST" action="?action=update-password" class="password-form">';
+    echo '<input type="hidden" name="csrf_token" value="' . $csrfToken . '">';
+    
+    echo '<div class="form-section">';
+    echo '<h2>Update Password</h2>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="current_password">Current Password:</label>';
+    echo '<input type="password" id="current_password" name="current_password" required>';
+    echo '</div>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="new_password">New Password:</label>';
+    echo '<input type="password" id="new_password" name="new_password" required>';
+    echo '<small>Must be at least 8 characters with uppercase, lowercase, and number</small>';
+    echo '</div>';
+    
+    echo '<div class="form-group">';
+    echo '<label for="confirm_password">Confirm New Password:</label>';
+    echo '<input type="password" id="confirm_password" name="confirm_password" required>';
+    echo '</div>';
+    
+    echo '</div>';
+    
+    echo '<div class="form-actions">';
+    echo '<button type="submit" class="btn btn-primary btn-large">Update Password</button>';
+    echo '</div>';
+    
+    echo '</form>';
+    echo '</div>';
+    
+    echo '</div>';
+}
+
+// Update password
+public function updatePassword() {
+    $this->requireAuth();
+    
+    if ($_POST) {
+        try {
+            // Verify CSRF token
+            if (!Security::verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+                throw new Exception("Invalid CSRF token");
+            }
+            
+            $userId = $_SESSION['user_id'];
+            $currentPassword = $_POST['current_password'];
+            $newPassword = $_POST['new_password'];
+            $confirmPassword = $_POST['confirm_password'];
+            
+            // Validate passwords match
+            if ($newPassword !== $confirmPassword) {
+                throw new Exception("New passwords do not match");
+            }
+            
+            // Update password
+            if ($this->userModel->updatePassword($userId, $currentPassword, $newPassword)) {
+                $_SESSION['success'] = 'Password updated successfully!';
+                header('Location: ?action=edit-profile');
+            } else {
+                throw new Exception("Failed to update password");
+            }
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header('Location: ?action=change-password');
+        }
+        exit;
+    }
+}
+
+// Helper method to check if user is logged in
+private function requireAuth() {
+    if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+        header('Location: ?action=show-login');
+        exit;
+    }
+}
 }
 ?>
