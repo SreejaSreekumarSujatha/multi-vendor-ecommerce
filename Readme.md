@@ -81,6 +81,7 @@ Configurable PayPal settings in one place
 ![Customer Dashboard](Screenshots/customer_dashboard.png)
 ![Customer Product List](Screenshots/customer_pdtcatlog.png)
 ![CustomerShpg Cart](Screenshots/customer_shpgcart.png)
+![Oaypal Integration](Screenshots/paypal_integration.png)
 ![Customer Product List](Screenshots/customer_pdtcatlog.png)
 ![Customer Order History](Screenshots/customer_orderhistory.png)
 ![Customer Addtocart](Screenshots/customer_addtocart.png)
