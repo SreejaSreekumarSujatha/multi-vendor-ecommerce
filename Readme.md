@@ -71,20 +71,20 @@ Configurable PayPal settings in one place
 6.Screenshots
 
 
-![Register](Screenshots/register.png)
-![Login](Screenshots/login.png)
-![Vendor Dashboard](Screenshots/vendor_dashboard.png)
-![Vendor Product List](Screenshots/vendor_pdtlist.png)
-![Vendor Add new Product ](Screenshots/vendor_addnew_pdt.png)
-![Vendor Order List](Screenshots/vendor_orderlist.png)
-![Vendor Earnings](Screenshots/vendor_earnings.png)
-![Customer Dashboard](Screenshots/customer_dashboard.png)
-![Customer Product List](Screenshots/customer_pdtcatlog.png)
-![CustomerShpg Cart](Screenshots/customer_shpgcart.png)
-![Oaypal Integration](Screenshots/paypal_integration.png)
-![Customer Product List](Screenshots/customer_pdtcatlog.png)
-![Customer Order History](Screenshots/customer_orderhistory.png)
-![Customer Addtocart](Screenshots/customer_addtocart.png)
+![Register](public/Screenshots/register.png)
+![Login](public/Screenshots/login.png)
+![Vendor Dashboard](public/Screenshots/vendor_dashboard.png)
+![Vendor Product List](public/Screenshots/vendor_pdtlist.png)
+![Vendor Add new Product ](public/Screenshots/vendor_addnew_pdt.png)
+![Vendor Order List](public/Screenshots/vendor_orderlist.png)
+![Vendor Earnings](public/Screenshots/vendor_earnings.png)
+![Customer Dashboard](public/Screenshots/customer_dashboard.png)
+![Customer Product List](public/Screenshots/customer_pdtcatlog.png)
+![CustomerShpg Cart](public/Screenshots/customer_shpgcart.png)
+![Oaypal Integration](public/Screenshots/paypal_integration.png)
+![Customer Product List](public/Screenshots/customer_pdtcatlog.png)
+![Customer Order History](public/Screenshots/customer_orderhistory.png)
+![Customer Addtocart](public/Screenshots/customer_addtocart.png)
 
  Contributing
 
