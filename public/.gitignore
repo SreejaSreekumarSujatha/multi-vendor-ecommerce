@@ -1,0 +1,36 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore sensitive config files
+config/paypal.php
+.env
+
+# Ignore database dumps (optional, if private)
+database/*.sql
+
+# Ignore node_modules or vendor if used
+node_modules/
+vendor/
+
+# Ignore IDE/editor config
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore OS-level files
+*.bak
+*.swp
+*.tmp
+
+# Ignore log files
+*.log
+logs/
+
+
+# Ignore Git backup files
+*.orig
+
+# Ignore composer lock if you're not using Composer
+composer.lock
