@@ -236,7 +236,7 @@ private function redirectToPayPal($cartItems, $total, $shippingAddress) {
     if (!defined('PAYPAL_SANDBOX_URL')) {
         define('PAYPAL_SANDBOX_URL', 'https://www.sandbox.paypal.com/cgi-bin/webscr');
         define('PAYPAL_LIVE_URL', 'https://www.paypal.com/cgi-bin/webscr');
-        define('PAYPAL_BUSINESS_EMAIL', 'sb-testing@business.example.com');
+        define('PAYPAL_BUSINESS_EMAIL', 'sb-9z243a31092737@business.example.com');
         define('PAYPAL_USE_SANDBOX', true);
         define('PAYPAL_RETURN_URL', 'http://localhost/multi-vendor-ecommerce/public/index.php?action=paypal-success');
         define('PAYPAL_CANCEL_URL', 'http://localhost/multi-vendor-ecommerce/public/index.php?action=paypal-cancel');

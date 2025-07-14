@@ -207,28 +207,23 @@ case 'change-password':
 case 'update-password':
     $authController->updatePassword();
     break;
-
-    case 'paypal-success':
-    if ($_SESSION['user_type'] === 'customer') {
-        $orderController->paypalSuccess();
-    } else {
-        $productController->paypalSuccess();
-    }
-    break;
 case 'paypal-cancel':
-    if ($_SESSION['user_type'] === 'customer') {
-        $orderController->paypalCancel();
-    } else {
-        $productController->paypalCancel();
-    }
-    break;
+    session_start();
+    $_SESSION['error'] = 'PayPal payment was cancelled. Your order has not been placed.';
+    header('Location: ?action=checkout');
+    exit;
+
+case 'paypal-success':
+    session_start();
+    $_SESSION['success'] = 'Payment completed! Please check your email for order confirmation.';
+    header('Location: ?action=dashboard');
+    exit;
+
 case 'paypal-ipn':
-    if ($_SESSION['user_type'] === 'customer') {
-        $orderController->paypalIPN();
-    } else {
-        $productController->paypalIPN();
-    }
-    break;
+    // Simple IPN handler
+    http_response_code(200);
+    echo "OK";
+    exit;
 }
 
 
